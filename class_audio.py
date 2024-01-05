@@ -1,12 +1,6 @@
-import tkinter as tk
-from tkinter import ttk
-import librosa
-import pyaudio
 import numpy as np
-from threading import Thread
 import sounddevice as sd
 from scipy.io.wavfile import write
-import matplotlib.pyplot as plt
 
 class audio:
     def __init__(self):
@@ -17,8 +11,6 @@ class audio:
         self.x_coordinates = []
 
     def record_audio(self, duration=3):
-        if not self.is_recording:
-            self.is_recording = True
             self.y_coordinates = []  # Reset previous data
             self.x_coordinates = []  # Reset previous data
             # Record audio
@@ -28,17 +20,7 @@ class audio:
             self.y_coordinates.extend(audio_data.flatten())
             # Create corresponding time values and append to x_coordinates
             self.x_coordinates.extend(np.arange(len(audio_data.flatten())) / self.sample_rate)
-        else:
-            self.is_recording = False
             self.save_audio()
-
-    def plot_spectrogram(self):
-        plt.figure()
-        plt.specgram(np.array(self.y_coordinates), Fs=self.sample_rate, cmap='viridis', aspect='auto')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Frequency (Hz)')
-        plt.title('Spectrogram')
-        plt.show()
 
     def save_audio(self):
         write(self.filename, self.sample_rate, np.array(self.y_coordinates))

@@ -63,40 +63,6 @@ class SpeechRecognitionUI:
         self.result_label = ttk.Label(self.master, text="Recognition Result:")
         self.result_label.grid(row=2, column=0, columnspan=2, padx=10, pady=10)
 
-    def start_recording(self, duration=5):
-        if not self.recording:
-            self.recording = True
-            self.record_thread = Thread(target=self._record_audio, args=(duration,))
-            self.record_thread.start()
-
-    def stop_recording(self):
-        if self.recording:
-            self.recording = False
-            self.record_thread.join()  # Wait for the recording thread to finish
-            # Process the recorded audio
-            self._process_audio()
-
-    def _record_audio(self, duration):
-        samplerate = 44100
-        audio_data = sd.rec(int(samplerate * duration), samplerate=samplerate, channels=1, dtype='int16')
-        sd.wait()
-
-        # Save the recorded audio
-        self.filename = "wow.wav"
-        write(self.filename, samplerate, audio_data)
-        print(f"Audio recorded and saved as {self.filename}")
-
-        # Plot the spectrogram
-        self. _process_audio()
-
-    def plot_spectrogram(self, audio_data, sample_rate):
-        plt.figure()
-        plt.specgram(audio_data, Fs=sample_rate, cmap='viridis', aspect='auto')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Frequency (Hz)')
-        plt.title('Spectrogram')
-        plt.show()
-
     def _process_audio(self):
         # Read audio data from file using librosa
         audio_data, _ = librosa.load(self.filename, sr=None)
@@ -113,9 +79,6 @@ class SpeechRecognitionUI:
         print("Prediction:", prediction)  # Add this line for debugging
         # Update the result label
         self.result_label.config(text=f"Recognition Result: {prediction[0]}")
-
-        # Plot the spectrogram
-        self.plot_spectrogram(audio_data, 44100)
 
     def __del__(self):
         if self.paudio:
