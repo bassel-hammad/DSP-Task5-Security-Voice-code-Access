@@ -13,7 +13,7 @@ from threading import Thread
 from Task5Ui import Ui_MainWindow
 from class_audio import audio
 import sys
-from Users_Dictionary import users
+#from Users_Dictionary import users
 
 
 class MyMainWindow(QMainWindow):
@@ -31,14 +31,23 @@ class MyMainWindow(QMainWindow):
 
         #modeComboBox setup
         self.modeComboBox = self.ui.modeComboBox
-
-
+        #checkbox setup
+        self.check1=self.ui.checkBox_1
+        self.check2=self.ui.checkBox_2
+        self.check3=self.ui.checkBox_3
+        self.check4=self.ui.checkBox_4
+        self.check5=self.ui.checkBox_5
+        self.check6=self.ui.checkBox_6
+        self.check7=self.ui.checkBox_7
+        self.check8=self.ui.checkBox_8
         # Audio files and labels
-        #if bta3t current index
-        #
-        # #else: bta3tha current index
-        # self.audio_files = ["grant_me_access_bassel_1.wav", "grant_me_access_bassel_2.wav", "grant_me_access_bassel_3.wav", "grant_me_access_bassel_4.wav", "grant_me_access_bassel_5.wav","open_middle_door_bassel_1.wav","open_middle_door_bassel_2.wav","open_middle_door_bassel_3.wav","open_middle_door_bassel_4.wav","open_middle_door_bassel_5.wav","unlock_the_gate_bassel_1.wav","unlock_the_gate_bassel_2.wav","unlock_the_gate_bassel_3.wav","unlock_the_gate_bassel_4.wav","unlock_the_gate_bassel_5.wav"]
-        # self.labels = ["grant_bassel", "grant_bassel","grant_bassel","grant_bassel","grant_bassel","open_bassel","open_bassel","open_bassel","open_bassel","open_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel"]
+        # if self.Mode==0:
+        #     self.audio_files = ["grant_me_access_bassel_1.wav", "grant_me_access_bassel_2.wav", "grant_me_access_bassel_3.wav", "grant_me_access_bassel_4.wav", "grant_me_access_bassel_5.wav","open_middle_door_bassel_1.wav","open_middle_door_bassel_2.wav","open_middle_door_bassel_3.wav","open_middle_door_bassel_4.wav","open_middle_door_bassel_5.wav","unlock_the_gate_bassel_1.wav","unlock_the_gate_bassel_2.wav","unlock_the_gate_bassel_3.wav","unlock_the_gate_bassel_4.wav","unlock_the_gate_bassel_5.wav"]
+        #     self.labels = ["grant_bassel", "grant_bassel","grant_bassel","grant_bassel","grant_bassel","open_bassel","open_bassel","open_bassel","open_bassel","open_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel"]
+        # elif self.Mode==1 :
+        self.audio_files = ["grant_me_access_bassel_1.wav", "grant_me_access_bassel_2.wav", "grant_me_access_bassel_3.wav", "grant_me_access_bassel_4.wav", "grant_me_access_bassel_5.wav","open_middle_door_bassel_1.wav","open_middle_door_bassel_2.wav","open_middle_door_bassel_3.wav","open_middle_door_bassel_4.wav","open_middle_door_bassel_5.wav","unlock_the_gate_bassel_1.wav","unlock_the_gate_bassel_2.wav","unlock_the_gate_bassel_3.wav","unlock_the_gate_bassel_4.wav","unlock_the_gate_bassel_5.wav","Mgrant_me1.wav","Mgrant_me2.wav","Mgrant_me3.wav","Mgrant_me4.wav","Mgrant_me5.wav","Mopen_Middle1.wav","Mopen_Middle2.wav","Mopen_Middle3.wav","Mopen_Middle4.wav","Mopen_Middle5.wav","Munlock_gate1.wav","Munlock_gate2.wav","Munlock_gate3.wav","Munlock_gate4.wav","Munlock_gate5.wav"]
+        self.labels = ["grant_bassel", "grant_bassel","grant_bassel","grant_bassel","grant_bassel","open_bassel","open_bassel","open_bassel","open_bassel","open_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel","Mgrant","Mgrant","Mgrant","Mgrant","Mgrant","Mopen","Mopen","Mopen","Mopen","Mopen","Munlock","Munlock","Munlock","Munlock","Munlock"]
+        
 
         # Define a fixed size for the features
         self.fixed_size = (13, 87)  # Adjust the size as needed
@@ -139,6 +148,8 @@ class MyMainWindow(QMainWindow):
         return mfccs
     
     def process_audio(self):
+     #mode speech recognition
+     if self.Mode==0:
         # Read audio data from file using librosa
         audio_data, _ = librosa.load(self.audio.filename, sr=None)
 
@@ -157,7 +168,6 @@ class MyMainWindow(QMainWindow):
         # Print the probability estimates
         print("Probability Estimates:", proba_estimates)
 
-    #mode speech recognition
         # Set a threshold for probability estimates
         threshold = 0.45
         # Check if the maximum probability for any class is below the threshold
@@ -174,20 +184,48 @@ class MyMainWindow(QMainWindow):
             self.sentenceTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
             self.sentenceTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
             self.sentenceTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
-        #else bta3t current index
+     elif self.Mode==1:     
+#mode voice recognition 
+        # Read audio data from file using librosa
+        audio_data, _ = librosa.load(self.audio.filename, sr=None)
 
-#mode voice recognition        
-        # Update the result label
-        print(f"Recognition Result: {prediction[0]}")
-        self.ui.accessStatusLabel.setText("Access Granted")
-        #bassel sentences
-        self.individualsTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
-        self.individualsTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
-        self.individualsTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
+        # Extract features from the audio data
+        features =self.extract_features(audio_data).flatten().reshape(1, -1)
+
+        # Assume X_train_flat and y_train are already defined
+        classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+        classifier.fit(self.X_train_flat,self.y_train)
+        # Get probability estimates for each class
+        proba_estimates = classifier.predict_proba(features)
+        # Make prediction
+        prediction = classifier.predict(features)
+        #hena if bta3t current_index=1
+        print("Prediction:", prediction)  # Add this line for debugging
+        # Print the probability estimates
+        print("Probability Estimates:", proba_estimates)
+          #  if self.check1.isChecked():    
+            # Set a threshold for probability estimates
+        threshold = 0.45
+        # Check if the maximum probability for any class is below the threshold
+        if np.max(proba_estimates) < threshold:
+            print("Access Denied: Low Confidence")
+            self.ui.accessStatusLabel.setText("Access Denied")
+            #bassel sentences
+            self.individualsTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
+            self.individualsTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
+            self.individualsTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
+        else:
+            # Update the result label
+            print(f"Recognition Result: {prediction[0]}")
+            self.ui.accessStatusLabel.setText("Access Granted")
+            #bassel sentences
+            self.individualsTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
+            self.individualsTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
+            self.individualsTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
+               
         
 
     
-
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     main_window = MyMainWindow()
