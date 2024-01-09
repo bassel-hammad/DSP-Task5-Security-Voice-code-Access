@@ -13,6 +13,7 @@ from threading import Thread
 from Task5Ui import Ui_MainWindow
 from class_audio import audio
 import sys
+from Users_Dictionary import users
 
 
 class MyMainWindow(QMainWindow):
@@ -26,13 +27,18 @@ class MyMainWindow(QMainWindow):
         # Create an instance of the audio class
         self.audio = audio()
 
+        self.Mode=0 #0 for speech recognition, 1 for voice recognition
+
+        #modeComboBox setup
+        self.modeComboBox = self.ui.modeComboBox
+
+
         # Audio files and labels
         #if bta3t current index
-        # self.audio_files = ["grant_me_access_bassel_1.wav", "grant_me_access_bassel_2.wav", "grant_me_access_bassel_3.wav", "grant_me_access_bassel_4.wav", "grant_me_access_bassel_5.wav","grant_me_access_bassel_6.wav","grant_me_access_bassel_7.wav","grant_me_access_bassel_8.wav","grant_me_access_bassel_9.wav","grant_me_access_bassel_10.wav","open_middle_door_bassel_1.wav","open_middle_door_bassel_2.wav","open_middle_door_bassel_3.wav","open_middle_door_bassel_4.wav","open_middle_door_bassel_5.wav","open_middle_door_bassel_6.wav","open_middle_door_bassel_7.wav","open_middle_door_bassel_8.wav","open_middle_door_bassel_9.wav","open_middle_door_bassel_10.wav","unlock_the_gate_bassel_1.wav","unlock_the_gate_bassel_2.wav","unlock_the_gate_bassel_3.wav","unlock_the_gate_bassel_4.wav","unlock_the_gate_bassel_5.wav","unlock_the_gate_bassel_6.wav","unlock_the_gate_bassel_7.wav"]
-        # self.labels = ["grant", "grant","grant","grant","grant", "grant","grant","grant","grant", "grant","open","open","open","open","open","open","open","open","open","open","unlock","unlock","unlock","unlock","unlock","unlock","unlock"]
+        #
         # #else: bta3tha current index
-        self.audio_files = ["grant_me_access_bassel_1.wav", "grant_me_access_bassel_2.wav", "grant_me_access_bassel_3.wav", "grant_me_access_bassel_4.wav", "grant_me_access_bassel_5.wav","open_middle_door_bassel_1.wav","open_middle_door_bassel_2.wav","open_middle_door_bassel_3.wav","open_middle_door_bassel_4.wav","open_middle_door_bassel_5.wav","unlock_the_gate_bassel_1.wav","unlock_the_gate_bassel_2.wav","unlock_the_gate_bassel_3.wav","unlock_the_gate_bassel_4.wav","unlock_the_gate_bassel_5.wav"]
-        self.labels = ["grant_bassel", "grant_bassel","grant_bassel","grant_bassel","grant_bassel","open_bassel","open_bassel","open_bassel","open_bassel","open_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel"]
+        # self.audio_files = ["grant_me_access_bassel_1.wav", "grant_me_access_bassel_2.wav", "grant_me_access_bassel_3.wav", "grant_me_access_bassel_4.wav", "grant_me_access_bassel_5.wav","open_middle_door_bassel_1.wav","open_middle_door_bassel_2.wav","open_middle_door_bassel_3.wav","open_middle_door_bassel_4.wav","open_middle_door_bassel_5.wav","unlock_the_gate_bassel_1.wav","unlock_the_gate_bassel_2.wav","unlock_the_gate_bassel_3.wav","unlock_the_gate_bassel_4.wav","unlock_the_gate_bassel_5.wav"]
+        # self.labels = ["grant_bassel", "grant_bassel","grant_bassel","grant_bassel","grant_bassel","open_bassel","open_bassel","open_bassel","open_bassel","open_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel","unlock_bassel"]
 
         # Define a fixed size for the features
         self.fixed_size = (13, 87)  # Adjust the size as needed
@@ -79,7 +85,14 @@ class MyMainWindow(QMainWindow):
 
         #Connect buttons to functions
         self.ui.recordButton.clicked.connect(self.change_recording_status_label) #record button
-        #self.ui.recordButton.clicked.connect(self.create_audio) #record button 
+         
+
+        #Connect modeComboBox to function
+        self.modeComboBox.currentIndexChanged.connect(self.change_mode)
+
+
+    def change_mode(self):
+        self.Mode=self.modeComboBox.currentIndex()
 
     def change_recording_status_label(self):
         text = self.recordingStatusLabel.text()
@@ -143,24 +156,26 @@ class MyMainWindow(QMainWindow):
         print("Prediction:", prediction)  # Add this line for debugging
         # Print the probability estimates
         print("Probability Estimates:", proba_estimates)
-#mode speech recognition
-        # # Set a threshold for probability estimates
-        # threshold = 0.4
-        # # Check if the maximum probability for any class is below the threshold
-        # if np.max(proba_estimates) < threshold:
-        #     print("Access Denied: Low Confidence")
-        #     self.ui.accessStatusLabel.setText("Access Denied")
-        #     self.sentenceTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
-        #     self.sentenceTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
-        #     self.sentenceTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
-        # else:
-        #     # Update the result label
-        #     print(f"Recognition Result: {prediction[0]}")
-        #     self.ui.accessStatusLabel.setText("Access Granted")
-        #     self.sentenceTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
-        #     self.sentenceTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
-        #     self.sentenceTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
+
+    #mode speech recognition
+        # Set a threshold for probability estimates
+        threshold = 0.45
+        # Check if the maximum probability for any class is below the threshold
+        if np.max(proba_estimates) < threshold:
+            print("Access Denied: Low Confidence")
+            self.ui.accessStatusLabel.setText("Access Denied")
+            self.sentenceTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
+            self.sentenceTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
+            self.sentenceTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
+        else:
+            # Update the result label
+            print(f"Recognition Result: {prediction[0]}")
+            self.ui.accessStatusLabel.setText("Access Granted")
+            self.sentenceTable.setItem(0, 0, QTableWidgetItem(f"per={proba_estimates[0][1]*100}%"))
+            self.sentenceTable.setItem(0, 1, QTableWidgetItem(f"per={proba_estimates[0][2]*100}%"))
+            self.sentenceTable.setItem(0, 2, QTableWidgetItem(f"per={proba_estimates[0][0]*100}%"))
         #else bta3t current index
+
 #mode voice recognition        
         # Update the result label
         print(f"Recognition Result: {prediction[0]}")
